@@ -51,6 +51,31 @@
 
         <div id="analyticsResult" class="result-box"></div>
     </div>
+
+    <!-- Секция PageRank -->
+    <div class="section">
+        <h2>🏆 Топ курсов по алгоритму PageRank</h2>
+        <p>Курсы, которые проходят самые успешные студенты (наибольшая значимость):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Место</th>
+                    <th>ID Курса</th>
+                    <th>Значимость (Rank)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course, rank in top_courses %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ course }}</td>
+                    <td>{{ "%.6f" | format(rank) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 </div>
 
 <script>
