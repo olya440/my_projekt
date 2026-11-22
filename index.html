@@ -2,113 +2,262 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Проект ИТИС: Онлайн-обучение</title>
+    <title>Аналитика Онлайн-Обучения</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; }
-        h2 { color: #34495e; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 30px; font-size: 0.9em; }
 
-        .section { margin-bottom: 40px; }
+        .scenario-box { background: #e8f4fd; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 30px; border-radius: 4px; font-size: 0.95em; line-height: 1.5; }
 
-        input[type="number"] { padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 200px; }
-        button { padding: 10px 20px; background-color: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        h2 { color: #34495e; border-bottom: 2px solid #ecf0f1; padding-bottom: 8px; margin-top: 40px; }
+        .desc { color: #666; font-size: 0.9em; margin-bottom: 15px; }
+
+        input[type="number"] { padding: 10px; border: 1px solid #ddd; border-radius: 6px; width: 200px; margin-right: 10px; }
+        button { padding: 10px 24px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; font-weight: 500; }
         button:hover { background-color: #2980b9; }
 
-        .result-box { margin-top: 15px; padding: 15px; background: #ecf0f1; border-radius: 5px; display: none; }
-        .error { color: #e74c3c; font-weight: bold; }
+        .result-box { margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 6px; display: none; border: 1px solid #eee; }
         .success { color: #27ae60; font-weight: bold; }
+        .error { color: #e74c3c; font-weight: bold; }
+
+        /* Стили для PageRank визуализации */
+        .rank-bar-container { margin-bottom: 12px; }
+        .rank-label { display: flex; justify-content: space-between; font-size: 0.9em; margin-bottom: 4px; }
+        .rank-bar-bg { background: #ecf0f1; height: 24px; border-radius: 12px; overflow: hidden; }
+        .rank-bar-fill { background: linear-gradient(90deg, #3498db, #8e44ad); height: 100%; border-radius: 12px; transition: width 0.5s ease; }
+
+        .big-score { font-size: 3em; color: #e67e22; font-weight: bold; text-align: center; margin: 20px 0; }
+        .score-desc { text-align: center; color: #7f8c8d; font-size: 0.9em; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #f8f9fa; color: #7f8c8d; font-weight: 600; font-size: 0.85em; text-transform: uppercase; }
+
+        /* === НОВЫЕ СТИЛИ ДЛЯ BOOTSTRAP === */
+        .bootstrap-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 1px solid #eee;
+        }
+        .ci-container {
+            position: relative;
+            height: 50px;
+            background: #e9ecef;
+            border-radius: 25px;
+            margin: 25px 0;
+            overflow: visible;
+        }
+        .zero-line {
+            position: absolute;
+            left: 50%;
+            top: -10px;
+            bottom: -10px;
+            width: 2px;
+            background: #495057;
+            z-index: 10;
+        }
+        .zero-label {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: -25px;
+            font-size: 0.8em;
+            color: #6c757d;
+            font-weight: bold;
+        }
+        .ci-bar {
+            position: absolute;
+            height: 100%;
+            border-radius: 25px;
+            opacity: 0.85;
+            transition: all 0.5s ease;
+        }
+        .ci-significant {
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+        }
+        .ci-not-significant {
+            background: linear-gradient(90deg, #e74c3c, #e67e22);
+        }
+        .ci-text {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            color: white;
+            z-index: 11;
+            font-size: 0.95em;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            white-space: nowrap;
+        }
+        .bootstrap-conclusion {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .conclusion-significant {
+            color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+        }
+        .conclusion-not-significant {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+        .bootstrap-note {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-top: 10px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🎓 Система анализа онлайн-обучения</h1>
-    <p style="text-align: center;">Гапонова Ольга Сергеевна | ИТИС</p>
+    <h1>🎓 Аналитика Онлайн-Обучения</h1>
+    <p class="subtitle">Инструмент для методистов и администраторов курсов</p>
 
-    <!-- Секция поиска -->
+    <!-- Сценарий использования -->
+    <div class="scenario-box">
+        <strong>💡 Как это работает:</strong> Представьте, что студент пожаловался на ошибку в оценке.
+        Введите его ID взаимодействия → система мгновенно найдет запись → проверьте динамику оценок на графике →
+        исправьте балл, и рейтинги курсов пересчитаются автоматически.
+    </div>
+
+    <!-- Поиск -->
     <div class="section">
-        <h2>🔍 Поиск по ID (Hash Map)</h2>
-        <p>Введите interaction_id для мгновенного поиска через вашу Hash Table:</p>
-        <input type="number" id="searchId" placeholder="Например: 12345">
-        <button onclick="performSearch()">Найти</button>
-
+        <h2>🔍 Поиск записи студента</h2>
+        <p class="desc">Мгновенный поиск по уникальному номеру взаимодействия для проверки или редактирования данных.</p>
+        <input type="number" id="searchId" placeholder="Введите interaction_id">
+        <button onclick="performSearch()">Найти запись</button>
         <div id="searchResult" class="result-box"></div>
     </div>
 
-    <!-- Секция аналитики -->
+    <!-- Аналитика -->
     <div class="section">
-        <h2>📈 Аналитика оценок (Segment Tree)</h2>
-        <p>Укажите диапазон индексов (от 0 до {{ df_len }}) для поиска максимальной оценки:</p>
+        <h2>📈 Динамика успеваемости</h2>
+        <p class="desc">Анализ максимальных оценок за выбранный временной период (например, за последнюю неделю).</p>
         <input type="number" id="rangeL" value="0" style="width: 80px;">
         <span>до</span>
         <input type="number" id="rangeR" value="1000" style="width: 80px;">
-        <button onclick="getAnalytics()">Узнать MAX</button>
-
+        <button onclick="getAnalytics()">Показать максимум</button>
         <div id="analyticsResult" class="result-box"></div>
     </div>
 
-    <!-- Секция PageRank -->
+    <!-- PageRank -->
     <div class="section">
-        <h2>🏆 Топ курсов по алгоритму PageRank</h2>
-        <p>Курсы, которые проходят самые успешные студенты (наибольшая значимость):</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Место</th>
-                    <th>ID Курса</th>
-                    <th>Значимость (Rank)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for course, rank in top_courses %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ course }}</td>
-                    <td>{{ "%.6f" | format(rank) }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <h2>🏆 Самые значимые курсы</h2>
+        <p class="desc">Курсы, которые чаще всего выбирают и успешно проходят лучшие студенты. Длина полоски отражает влияние курса на общую успеваемость.</p>
+
+        {% for course, rank in top_courses %}
+        <div class="rank-bar-container">
+            <div class="rank-label">
+                <span>{{ course }}</span>
+                <span>{{ "%.4f" | format(rank) }}</span>
+            </div>
+            <div class="rank-bar-bg">
+                <div class="rank-bar-fill" style="width: {{ (rank / max_rank * 100) }}%;"></div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 
-    <!-- Секция Бинарной Кучи -->
+    <!-- Binary Heap -->
     <div class="section">
-        <h2>🔥 Топ успеваемости (Binary Heap)</h2>
-        <p>Максимальная оценка во всем датасете (извлечение за O(1)):</p>
-        <div style="font-size: 2em; color: #e67e22; font-weight: bold;">
-            {{ top_score }} баллов
-        </div>
-        <p><i>Используется Max-Heap для поддержания приоритетной очереди оценок.</i></p>
+        <h2>🔥 Рекорд успеваемости</h2>
+        <p class="desc">Самая высокая оценка среди всех {{ total_records }} взаимодействий в системе.</p>
+        <div class="big-score">{{ top_score }}</div>
+        <p class="score-desc">баллов из 100 возможных</p>
     </div>
+
+    <!-- Bootstrap: Статистическая достоверность -->
+    <div class="section">
+        <h2>📊 Статистическая достоверность (Bootstrap)</h2>
+        <p class="desc">
+            Сравнение успеваемости на двух курсах через перевыборку с возвращением.
+            Если доверительный интервал разницы <b>не пересекает 0</b>,
+            разница в оценках статистически значима и не случайна.
+        </p>
+
+        {% if boot_result and course_a_name and course_b_name %}
+        <div class="bootstrap-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span style="font-weight: 600;">{{ course_b_name }} vs {{ course_a_name }}</span>
+                <span style="font-size: 1.1em; color: {{ '#27ae60' if boot_result.is_significant else '#e74c3c' }}; font-weight: bold;">
+                    Разница: {{ boot_result.observed_diff }} баллов
+                </span>
+            </div>
+
+            <!-- Визуализация доверительного интервала -->
+            <div class="ci-container">
+                <div class="zero-label">0</div>
+                <div class="zero-line"></div>
+
+                <!-- Полоса интервала -->
+                <div class="ci-bar {% if boot_result.is_significant %}ci-significant{% else %}ci-not-significant{% endif %}"
+                     style="left: 0%; width: 100%;">
+                </div>
+
+                <!-- Текст интервала поверх полосы -->
+                <div class="ci-text">
+                    [{{ boot_result.lower }}; {{ boot_result.upper }}]
+                </div>
+            </div>
+
+            <!-- Вывод о значимости -->
+            <div class="bootstrap-conclusion {% if boot_result.is_significant %}conclusion-significant{% else %}conclusion-not-significant{% endif %}">
+                {% if boot_result.is_significant %}
+                    ✅ Разница СТАТИСТИЧЕСКИ ЗНАЧИМА<br>
+                    <small style="font-weight: normal;">Мы уверены, что {{ course_b_name }} действительно эффективнее</small>
+                {% else %}
+                    ⚠️ Разница НЕ значима<br>
+                    <small style="font-weight: normal;">Интервал пересекает 0. Возможно, курсы одинаково хороши</small>
+                {% endif %}
+            </div>
+
+            <p class="bootstrap-note">
+                Метод: Bootstrap diff (2000 перевыборок с возвращением). Единица анализа: пара (student_id, course_id).
+            </p>
+        </div>
+        {% else %}
+        <div class="bootstrap-card" style="text-align: center; color: #7f8c8d;">
+            <p>⏳ Недостаточно данных для сравнения выбранных курсов.<br>
+            <small>Убедитесь, что у каждого курса есть минимум 2 наблюдения.</small></p>
+        </div>
+        {% endif %}
+    </div>
+
 </div>
 
 <script>
     async function performSearch() {
         const id = document.getElementById('searchId').value;
         const resBox = document.getElementById('searchResult');
+        if (!id) { resBox.style.display = 'block'; resBox.innerHTML = '<div class="error">Введите ID!</div>'; return; }
 
         const response = await fetch('/search', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({id: id})
         });
         const data = await response.json();
 
         resBox.style.display = 'block';
         if (data.found) {
-            let html = '<div class="success">Запись найдена!</div><table>';
+            let html = '<div class="success">✅ Запись найдена!</div><table>';
             for (const [key, value] of Object.entries(data.data)) {
                 html += `<tr><td><b>${key}</b></td><td>${value}</td></tr>`;
             }
             html += '</table>';
             resBox.innerHTML = html;
         } else {
-            resBox.innerHTML = '<div class="error">Запись не найдена.</div>';
+            resBox.innerHTML = '<div class="error">❌ Запись с таким ID не найдена.</div>';
         }
     }
 
@@ -118,14 +267,13 @@
         const resBox = document.getElementById('analyticsResult');
 
         const response = await fetch('/analytics', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({l: l, r: r})
         });
         const data = await response.json();
 
         resBox.style.display = 'block';
-        resBox.innerHTML = `<div class="success">Максимальная оценка на отрезке [${l}, ${r}]: <b>${data.max_score}</b></div>`;
+        resBox.innerHTML = `<div class="success">Максимальная оценка на этом отрезке: <b>${data.max_score}</b> баллов</div>`;
     }
 </script>
 
