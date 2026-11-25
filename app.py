@@ -1,3 +1,4 @@
+# app.py
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import numpy as np
@@ -6,10 +7,12 @@ from segment_tree import SegmentTreeIndex
 from page_rank import PageRank
 from binary_heap import BinaryHeap
 from bootstrap import bootstrap_diff
+from minhash_lsh import prepare_data_and_build_index, find_similar_students
 
 app = Flask(__name__)
 
-# Занрузка и подготовка данных
+# 1. ЗАГРУЗКА И ПОДГОТОВКА ДАННЫХ
+
 df = pd.read_csv('online_learning_dataset.csv')
 df_sorted = df.sort_values(by='timestamp').reset_index(drop=True)
 scores = df_sorted['score'].tolist()
@@ -18,7 +21,7 @@ keys = df_sorted['interaction_id'].tolist()
 # Агрегация до уровня пар (студент, курс) для Bootstrap
 pair_stats = df.groupby(['student_id', 'course_id'])['score'].mean().reset_index()
 
-# Инициализация структур данных
+# 2. ИНИЦИАЛИЗАЦИЯ СТРУКТУР ДАННЫХ
 
 # Hash Map: индекс по interaction_id
 hash_index = MyHashMap()
@@ -46,7 +49,8 @@ top_courses = sorted(course_ranks.items(), key=lambda x: x[1], reverse=True)[:10
 # Нормализация рангов для CSS-визуализации (ширина полоски в %)
 max_rank = top_courses[0][1] if top_courses else 1
 
-# Расчет Bootstrap (Сравнение топ-курса и среднего курса)
+# 3. РАСЧЕТ BOOTSTRAP (Сравнение топ-курса и среднего курса)
+
 boot_result = None
 course_a_name = None
 course_b_name = None
@@ -73,7 +77,12 @@ if len(top_courses) > 1:
             'observed_diff': round(float(np.mean(scores_top) - np.mean(scores_mid)), 2)
         }
 
-# Маршруты
+# 4. ИНИЦИАЛИЗАЦИЯ MINHASH / LSH
+
+# num_hashes=128, lsh_width=4 (32 полосы), sample_size=500 студентов
+signatures, lsh_index, students_sample, lsh_width = prepare_data_and_build_index(df)
+
+# 5. МАРШРУТЫ
 
 @app.route('/')
 def home():
@@ -125,6 +134,21 @@ def update_score():
     score_heap.push(new_val)
 
     return jsonify({'status': 'ok'})
+
+
+@app.route('/recommend', methods=['POST'])
+def recommend():
+    data = request.json
+    student_id = str(data.get('student_id'))
+
+    similar = find_similar_students(student_id, signatures, lsh_index, students_sample, lsh_width)
+
+    # Форматируем результат для фронтенда
+    results = []
+    for sid, jac in similar:
+        results.append({'student_id': sid, 'jaccard': jac})
+
+    return jsonify({'similar_students': results})
 
 
 if __name__ == '__main__':
